@@ -1,0 +1,1 @@
+# paper-mario-origami-solver
