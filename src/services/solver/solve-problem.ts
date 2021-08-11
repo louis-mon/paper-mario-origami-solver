@@ -27,14 +27,7 @@ export const solveProblem = (params: SolveProblemParams) => {
     steps: SolutionStepState[];
   };
 
-  let openedSolutions = 0;
-  const openSolution = (): void => {
-    ++openedSolutions;
-  };
-  const closeSolution = (): void => {
-    --openedSolutions;
-    if (openedSolutions === 0) params.onFinish();
-  };
+  let canceled = false;
 
   const checkSolution = (problem: ProblemInput): boolean => {
     const checkLine =
@@ -66,7 +59,7 @@ export const solveProblem = (params: SolveProblemParams) => {
     });
   };
 
-  const checkNewStep = <T extends SolutionStep>({
+  const checkNewStep = async <T extends SolutionStep>({
     currentState,
     newStep,
     getNewState,
@@ -74,49 +67,62 @@ export const solveProblem = (params: SolveProblemParams) => {
     currentState: SearchState;
     newStep: T;
     getNewState: (circles: ProblemInputCircles, step: T) => ProblemInputCircles;
-  }) => {
-    const newState: SearchState = {
-      problem: {
-        nbSteps: currentState.problem.nbSteps - 1,
-        circles: getNewState(currentState.problem.circles, newStep),
-      },
-      steps: currentState.steps.concat({
-        step: newStep,
-        problem: currentState.problem,
-      }),
-    };
-    if (checkSolution(newState.problem)) {
-      params.onSolution({
-        steps: newState.steps,
-        finalState: newState.problem,
-      });
-      return;
-    }
-    searchForSolsGivenSteps(newState);
-  };
+  }): Promise<void> =>
+    new Promise((resolve) =>
+      setTimeout(() => {
+        if (canceled) return resolve();
+        const newState: SearchState = {
+          problem: {
+            nbSteps: currentState.problem.nbSteps - 1,
+            circles: getNewState(currentState.problem.circles, newStep),
+          },
+          steps: currentState.steps.concat({
+            step: newStep,
+            problem: currentState.problem,
+          }),
+        };
+        if (checkSolution(newState.problem)) {
+          params.onSolution({
+            steps: newState.steps,
+            finalState: newState.problem,
+          });
+          return resolve();
+        }
+        searchForSolsGivenSteps(newState).then(resolve);
+      }, 0)
+    );
 
-  const searchForSolsGivenSteps = (currentState: SearchState): void => {
+  const searchForSolsGivenSteps = async (
+    currentState: SearchState
+  ): Promise<void> => {
     if (currentState.problem.nbSteps === 0) {
       return;
     }
-    const doWork = () => {
-      _.range(nbCircles).forEach((circleIndex) => {
-        _.range(1, nbCells).forEach((move) => {
+    const subSteps = _.range(nbCircles).flatMap((circleIndex) =>
+      _.range(1, nbCells).map(
+        (move) => () =>
           checkNewStep({
             currentState,
             newStep: { kind: "circle", move, circleIndex },
             getNewState: circleStep,
-          });
-        });
-      });
-      closeSolution();
-    };
-    openSolution();
-    setTimeout(doWork, 0);
+          })
+      )
+    );
+    for (const step of subSteps) {
+      await step();
+    }
   };
 
   searchForSolsGivenSteps({
     problem: params.problem,
     steps: [],
+  }).then(() => {
+    if (!canceled) params.onFinish();
   });
+
+  return {
+    cancel: () => {
+      canceled = true;
+    },
+  };
 };

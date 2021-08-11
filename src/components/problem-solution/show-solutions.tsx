@@ -24,7 +24,7 @@ export const ShowSolutions: React.FC<{ problem: ProblemInput }> = ({
   const [selected, setSelected] = React.useState<number | null>(null);
 
   React.useEffect(() => {
-    solveProblem({
+    const { cancel } = solveProblem({
       problem,
       onSolution: (sol) => {
         addSolution(sol);
@@ -32,6 +32,7 @@ export const ShowSolutions: React.FC<{ problem: ProblemInput }> = ({
       },
       onFinish: () => setDone(true),
     });
+    return cancel;
   }, []);
 
   return (
