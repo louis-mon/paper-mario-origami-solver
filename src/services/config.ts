@@ -13,5 +13,5 @@ export const initialProblemInput: ProblemInput = {
   nbSteps: 2,
 };
 
-export const nbMinSteps = 2;
+export const nbMinSteps = 1;
 export const nbMaxSteps = 4;

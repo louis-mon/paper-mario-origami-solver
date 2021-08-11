@@ -62,7 +62,7 @@ export const solveProblem = (params: SolveProblemParams) => {
   const checkSolution = (problem: ProblemInput): boolean => {
     const checkLine =
       (p: (value: TargetInput) => boolean) => (rayIndex: number) =>
-        problem.circles.every((circle) => p(circle[rayIndex]));
+        problem.circles.every((circle) => p(circle[rayIndex % nbCells]));
     const checkLineFull = checkLine((value) => value !== null);
     const checkLineEmpty = checkLine((value) => value === null);
     const checkLineOk = (r: number) => checkLineFull(r) || checkLineEmpty(r);
@@ -70,11 +70,33 @@ export const solveProblem = (params: SolveProblemParams) => {
       _.range(nbCircles).every((circleIndex) =>
         _.range(blockSize).every((i) => {
           const value = problem.circles[circleIndex][(i + rayIndex) % nbCells];
-          return circleIndex > blockSize ? value === null : value !== null;
+          return circleIndex < blockSize ? value !== null : value === null;
         })
       );
 
-    return _.range(nbCells).every(checkLineOk);
+    const findRayIndexFailed = (fromIndex: number, toIndex: number) => {
+      let currentIndex = fromIndex;
+      let foundLine = false;
+      while (currentIndex < toIndex) {
+        if (checkLineOk(currentIndex)) {
+          foundLine = true;
+          ++currentIndex;
+        } else if (checkBlock(currentIndex) && currentIndex < toIndex - 1) {
+          currentIndex += 2;
+        } else return { currentIndex, foundLine };
+      }
+      return null;
+    };
+
+    const failedSearch = findRayIndexFailed(0, nbCells);
+    return (
+      failedSearch === null ||
+      (!failedSearch.foundLine &&
+        findRayIndexFailed(
+          failedSearch.currentIndex + nbCells - 1,
+          nbCells * 2 + 1
+        ) === null)
+    );
   };
 
   const normalizeModulo = (value: number, modulo: number) =>
