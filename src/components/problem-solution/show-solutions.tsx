@@ -34,6 +34,7 @@ export const ShowSolutions: React.FC<{ problem: ProblemInput }> = ({
       onFinish: () => setTime(Date.now() - now),
     });
     return cancel;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
