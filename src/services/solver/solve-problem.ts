@@ -27,7 +27,30 @@ export const solveProblem = (params: SolveProblemParams) => {
     steps: SolutionStepState[];
   };
 
+  const alreadyChecked: Array<{ [s: string]: boolean }> = _.range(
+    params.problem.nbSteps
+  ).map(() => ({}));
+
   let canceled = false;
+
+  const cacheProblem = (problem: ProblemInput) => {
+    const signature = problem.circles
+      .map((circle) =>
+        circle.map((v) => (v === null ? " " : v.toString())).join(",")
+      )
+      .join(",");
+    const solsWithLessOrEqualStep = _.takeRight(
+      alreadyChecked,
+      problem.nbSteps + 1
+    );
+    if (!solsWithLessOrEqualStep[0][signature]) {
+      solsWithLessOrEqualStep.forEach((cache) => {
+        cache[signature] = true;
+      });
+      return false;
+    }
+    return true;
+  };
 
   const checkSolution = (problem: ProblemInput): boolean => {
     const checkLine =
@@ -81,6 +104,7 @@ export const solveProblem = (params: SolveProblemParams) => {
             problem: currentState.problem,
           }),
         };
+        if (cacheProblem(newState.problem)) return resolve();
         if (checkSolution(newState.problem)) {
           params.onSolution({
             steps: newState.steps,
@@ -108,9 +132,7 @@ export const solveProblem = (params: SolveProblemParams) => {
           })
       )
     );
-    for (const step of subSteps) {
-      await step();
-    }
+    await Promise.all(subSteps.map((step) => step()));
   };
 
   searchForSolsGivenSteps({
