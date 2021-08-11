@@ -20,24 +20,28 @@ export const ShowSolutions: React.FC<{ problem: ProblemInput }> = ({
     (state: Solution[], newSol: Solution) => state.concat(newSol),
     []
   );
-  const [done, setDone] = React.useState(false);
+  const [time, setTime] = React.useState<number | null>(null);
   const [selected, setSelected] = React.useState<number | null>(null);
 
   React.useEffect(() => {
+    const now = Date.now();
     const { cancel } = solveProblem({
       problem,
       onSolution: (sol) => {
         addSolution(sol);
         if (selected === null) setSelected(0);
       },
-      onFinish: () => setDone(true),
+      onFinish: () => setTime(Date.now() - now),
     });
     return cancel;
   }, []);
 
   return (
     <Box width={"100%"}>
-      {done ? "Done!" : "In progress..."} Available solutions:
+      {time !== null
+        ? `Done! ${Math.floor(time / 1000)}.${time % 1000}s`
+        : "In progress..."}{" "}
+      Available solutions:
       <Grid container>
         {solutions.map((sol, i) => (
           <Grid

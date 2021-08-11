@@ -29,6 +29,13 @@ export const solveProblem = (params: SolveProblemParams) => {
   const nbRays = nbCells / 2;
   const blockSize = 2;
 
+  const moveCellsRange = _.range(1, nbCells);
+  const circleIndexes = _.range(nbCircles);
+  const raysIndexes = _.range(nbRays);
+  const raysMovesRange = _.range(1, nbCircles * 2);
+  const blockIndexes = _.range(blockSize);
+  const cellIndexes = _.range(nbCells);
+
   type SearchState = {
     problem: ProblemInput;
     steps: SolutionStepState[];
@@ -66,37 +73,28 @@ export const solveProblem = (params: SolveProblemParams) => {
     const checkLineFull = checkLine((value) => value !== null);
     const checkLineEmpty = checkLine((value) => value === null);
     const checkLineOk = (r: number) => checkLineFull(r) || checkLineEmpty(r);
-    const checkBlock = (rayIndex: number) =>
-      _.range(nbCircles).every((circleIndex) =>
-        _.range(blockSize).every((i) => {
+    const checkBlock = (rayIndex: number) => {
+      return circleIndexes.every((circleIndex) =>
+        blockIndexes.every((i) => {
           const value = problem.circles[circleIndex][(i + rayIndex) % nbCells];
           return circleIndex < blockSize ? value !== null : value === null;
         })
       );
+    };
 
-    const findRayIndexFailed = (fromIndex: number, toIndex: number) => {
+    const checkOnRange = (fromIndex: number, toIndex: number) => {
       let currentIndex = fromIndex;
-      let foundLine = false;
       while (currentIndex < toIndex) {
         if (checkLineOk(currentIndex)) {
-          foundLine = true;
           ++currentIndex;
         } else if (checkBlock(currentIndex) && currentIndex < toIndex - 1) {
           currentIndex += 2;
-        } else return { currentIndex, foundLine };
+        } else return false;
       }
-      return null;
+      return true;
     };
 
-    const failedSearch = findRayIndexFailed(0, nbCells);
-    return (
-      failedSearch === null ||
-      (!failedSearch.foundLine &&
-        findRayIndexFailed(
-          failedSearch.currentIndex + nbCells - 1,
-          nbCells * 2 + 1
-        ) === null)
-    );
+    return checkOnRange(0, nbCells) || checkOnRange(1, nbCells + 1);
   };
 
   const normalizeModulo = (value: number, modulo: number) =>
@@ -108,7 +106,7 @@ export const solveProblem = (params: SolveProblemParams) => {
   ): ProblemInputCircles => {
     return circles.map((circle, circleIndex) => {
       if (circleIndex !== step.circleIndex) return circle;
-      return _.range(nbCells).map(
+      return cellIndexes.map(
         (cellIndex) => circle[normalizeModulo(cellIndex - step.move, nbCells)]
       );
     });
@@ -172,8 +170,8 @@ export const solveProblem = (params: SolveProblemParams) => {
     if (currentState.problem.nbSteps === 0) {
       return;
     }
-    const circleSubSteps = _.range(nbCircles).flatMap((circleIndex) =>
-      _.range(1, nbCells).map(
+    const circleSubSteps = circleIndexes.flatMap((circleIndex) =>
+      moveCellsRange.map(
         (move) => () =>
           checkNewStep({
             currentState,
@@ -183,8 +181,8 @@ export const solveProblem = (params: SolveProblemParams) => {
       )
     );
 
-    const raySubSteps = _.range(nbRays).flatMap((rayIndex) =>
-      _.range(1, nbCircles * 2).map(
+    const raySubSteps = raysIndexes.flatMap((rayIndex) =>
+      raysMovesRange.map(
         (move) => () =>
           checkNewStep({
             currentState,
