@@ -170,26 +170,36 @@ export const solveProblem = (params: SolveProblemParams) => {
     if (currentState.problem.nbSteps === 0) {
       return;
     }
-    const circleSubSteps = circleIndexes.flatMap((circleIndex) =>
-      moveCellsRange.map(
-        (move) => () =>
-          checkNewStep({
-            currentState,
-            newStep: { kind: "circle", move, circleIndex },
-            getNewState: circleStep,
-          })
-      )
+    const circlesToSkip = _.takeRightWhile(
+      currentState.steps,
+      (step) => step.step.kind === "circle"
+    ).map((step) => (step.step as SolutionStepCircle).circleIndex);
+    const circleSubSteps = _.difference(circleIndexes, circlesToSkip).flatMap(
+      (circleIndex) =>
+        moveCellsRange.map(
+          (move) => () =>
+            checkNewStep({
+              currentState,
+              newStep: { kind: "circle", move, circleIndex },
+              getNewState: circleStep,
+            })
+        )
     );
 
-    const raySubSteps = raysIndexes.flatMap((rayIndex) =>
-      raysMovesRange.map(
-        (move) => () =>
-          checkNewStep({
-            currentState,
-            newStep: { kind: "ray", move, rayIndex },
-            getNewState: rayStep,
-          })
-      )
+    const raysToSkip = _.takeRightWhile(
+      currentState.steps,
+      (step) => step.step.kind === "ray"
+    ).map((step) => (step.step as SolutionStepRay).rayIndex);
+    const raySubSteps = _.difference(raysIndexes, raysToSkip).flatMap(
+      (rayIndex) =>
+        raysMovesRange.map(
+          (move) => () =>
+            checkNewStep({
+              currentState,
+              newStep: { kind: "ray", move, rayIndex },
+              getNewState: rayStep,
+            })
+        )
     );
     await Promise.all(circleSubSteps.concat(raySubSteps).map((step) => step()));
   };
