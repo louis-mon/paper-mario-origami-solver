@@ -23,8 +23,8 @@ describe("Solve problem", () => {
     };
   };
 
-  let tar0 = 0;
-  it("solves: one line", () =>
+  const tar0 = 0;
+  test("one line circle", () =>
     expectProblem({
       nbSteps: 1,
       circles: [
@@ -34,7 +34,7 @@ describe("Solve problem", () => {
       ],
     }).toHaveSolution([{ kind: "circle", circleIndex: 1, move: 2 }]));
 
-  it("solves: one line past end", () =>
+  test("one line past end circle", () =>
     expectProblem({
       nbSteps: 1,
       circles: [
@@ -44,7 +44,7 @@ describe("Solve problem", () => {
       ],
     }).toHaveSolution([{ kind: "circle", circleIndex: 1, move: 4 }]));
 
-  it("solves: two lines", () =>
+  test("two lines circle", () =>
     expectProblem({
       nbSteps: 2,
       circles: [
@@ -56,5 +56,70 @@ describe("Solve problem", () => {
     }).toHaveSolution([
       { kind: "circle", circleIndex: 1, move: 4 },
       { kind: "circle", circleIndex: 3, move: 1 },
+    ]));
+
+  const oneLineRay1 = expectProblem({
+    nbSteps: 1,
+    circles: [
+      [null, null, null, null, null, null],
+      [null, null, null, null, null, null],
+      [null, tar0, null, null, tar0, null],
+      [null, tar0, null, null, tar0, null],
+    ],
+  });
+  test("one line ray 1", () =>
+    oneLineRay1.toHaveSolution([{ kind: "ray", rayIndex: 1, move: 2 }]));
+
+  test("one line ray 1: second", () =>
+    oneLineRay1.toHaveSolution([{ kind: "ray", rayIndex: 1, move: 6 }]));
+
+  test("one line ray 2", () =>
+    expectProblem({
+      nbSteps: 1,
+      circles: [
+        [null, null, null, null, null, null],
+        [null, null, null, null, null, null],
+        [tar0, null, null, tar0, null, null],
+        [tar0, null, null, tar0, null, null],
+      ],
+    }).toHaveSolution([{ kind: "ray", rayIndex: 0, move: 2 }]));
+
+  test("one line ray 3", () =>
+    expectProblem({
+      nbSteps: 1,
+      circles: [
+        [null, tar0, null, null, tar0, null],
+        [null, tar0, null, null, null, null],
+        [null, tar0, null, null, null, null],
+        [null, null, null, null, null, null],
+      ],
+    }).toHaveSolution([{ kind: "ray", rayIndex: 1, move: 1 }]));
+
+  test("two lines ray 1", () =>
+    expectProblem({
+      nbSteps: 2,
+      circles: [
+        [null, tar0, tar0, null, tar0, tar0],
+        [null, tar0, null, null, null, tar0],
+        [null, tar0, null, null, null, tar0],
+        [null, null, null, null, null, null],
+      ],
+    }).toHaveSolution([
+      { kind: "ray", rayIndex: 1, move: 1 },
+      { kind: "ray", rayIndex: 2, move: 3 },
+    ]));
+
+  test("line with ray then circle", () =>
+    expectProblem({
+      nbSteps: 2,
+      circles: [
+        [null, tar0, null, null, null, null],
+        [null, tar0, null, null, null, null],
+        [null, tar0, tar0, null, null, null],
+        [null, null, null, null, null, null],
+      ],
+    }).toHaveSolution([
+      { kind: "ray", rayIndex: 2, move: 1 },
+      { kind: "circle", circleIndex: 3, move: 5 },
     ]));
 });

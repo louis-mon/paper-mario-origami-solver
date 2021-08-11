@@ -8,6 +8,7 @@ import {
   Solution,
   SolutionStep,
   SolutionStepCircle,
+  SolutionStepRay,
   SolutionStepState,
 } from "../types/solution";
 
@@ -17,9 +18,15 @@ export type SolveProblemParams = {
   onFinish: () => void;
 };
 
+type GetNewState<T extends SolutionStep> = (
+  circles: ProblemInputCircles,
+  step: T
+) => ProblemInputCircles;
+
 export const solveProblem = (params: SolveProblemParams) => {
   const nbCircles = params.problem.circles.length;
   const nbCells = params.problem.circles[0].length;
+  const nbRays = nbCells / 2;
   const blockSize = 2;
 
   type SearchState = {
@@ -70,16 +77,37 @@ export const solveProblem = (params: SolveProblemParams) => {
     return _.range(nbCells).every(checkLineOk);
   };
 
-  const circleStep = (
-    circles: ProblemInputCircles,
-    step: SolutionStepCircle
+  const normalizeModulo = (value: number, modulo: number) =>
+    value >= 0 ? value % modulo : modulo - (-value % modulo);
+
+  const circleStep: GetNewState<SolutionStepCircle> = (
+    circles,
+    step
   ): ProblemInputCircles => {
     return circles.map((circle, circleIndex) => {
       if (circleIndex !== step.circleIndex) return circle;
       return _.range(nbCells).map(
-        (i) => circle[(i - step.move + nbCells) % nbCells]
+        (cellIndex) => circle[normalizeModulo(cellIndex - step.move, nbCells)]
       );
     });
+  };
+
+  const rayStep: GetNewState<SolutionStepRay> = (circles, step) => {
+    return circles.map((circle, circleIndex) =>
+      circle.map((value, cellIndex) => {
+        if (cellIndex % nbRays === step.rayIndex) {
+          const dir = cellIndex < nbRays ? -1 : 1;
+          const pos = normalizeModulo(
+            circleIndex + step.move * dir,
+            nbCircles * 2
+          );
+          return circles[pos < nbCircles ? pos : nbCircles * 2 - pos - 1][
+            pos < nbCircles ? cellIndex : (cellIndex + nbRays) % nbCells
+          ];
+        }
+        return value;
+      })
+    );
   };
 
   const checkNewStep = async <T extends SolutionStep>({
@@ -89,7 +117,7 @@ export const solveProblem = (params: SolveProblemParams) => {
   }: {
     currentState: SearchState;
     newStep: T;
-    getNewState: (circles: ProblemInputCircles, step: T) => ProblemInputCircles;
+    getNewState: GetNewState<T>;
   }): Promise<void> =>
     new Promise((resolve) =>
       setTimeout(() => {
@@ -122,7 +150,7 @@ export const solveProblem = (params: SolveProblemParams) => {
     if (currentState.problem.nbSteps === 0) {
       return;
     }
-    const subSteps = _.range(nbCircles).flatMap((circleIndex) =>
+    const circleSubSteps = _.range(nbCircles).flatMap((circleIndex) =>
       _.range(1, nbCells).map(
         (move) => () =>
           checkNewStep({
@@ -132,7 +160,18 @@ export const solveProblem = (params: SolveProblemParams) => {
           })
       )
     );
-    await Promise.all(subSteps.map((step) => step()));
+
+    const raySubSteps = _.range(nbRays).flatMap((rayIndex) =>
+      _.range(1, nbCircles * 2).map(
+        (move) => () =>
+          checkNewStep({
+            currentState,
+            newStep: { kind: "ray", move, rayIndex },
+            getNewState: rayStep,
+          })
+      )
+    );
+    await Promise.all(circleSubSteps.concat(raySubSteps).map((step) => step()));
   };
 
   searchForSolsGivenSteps({
