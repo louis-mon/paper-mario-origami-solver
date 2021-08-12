@@ -68,12 +68,12 @@ export const ProblemInputCircles: React.FC<ProblemInputCirclesProps> = (
   props
 ) => {
   const viewBoxSide = nbCircles + centreSpace;
-  const sizeRatio = { small: 0.3, med: 0.5, big: 1 }[props.size];
+  const sizeRatio = { small: 27, med: 46, big: 100 }[props.size];
 
   return (
     <svg
-      width={400 * sizeRatio}
-      height={400 * sizeRatio}
+      width={`${sizeRatio}vw`}
+      height={`${sizeRatio}vw`}
       viewBox={`${-viewBoxSide} ${-viewBoxSide} ${viewBoxSide * 2} ${
         viewBoxSide * 2
       }`}
