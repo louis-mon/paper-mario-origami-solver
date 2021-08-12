@@ -47,7 +47,7 @@ export const solveProblem = (params: SolveProblemParams) => {
 
   let canceled = false;
 
-  const cacheProblem = (problem: ProblemInput) => {
+  const cacheProblem = (problem: ProblemInput): boolean => {
     const signature = problem.circles
       .map((circle) =>
         circle.map((v) => (v === null ? " " : v.toString())).join(",")
