@@ -17,7 +17,9 @@ export const SolutionDescription: React.FC<SolutionDescriptionProps> = ({
           <ShowSolutionStep step={step} />
         </Grid>
       ))}
-      <ProblemInputCircles value={solution.finalState} size={"med"} />
+      <Grid item xs={6}>
+        <ProblemInputCircles value={solution.finalState} size={"med"} />
+      </Grid>
     </Grid>
   );
 };

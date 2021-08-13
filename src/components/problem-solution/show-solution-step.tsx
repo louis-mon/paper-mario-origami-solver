@@ -1,5 +1,5 @@
 import React from "react";
-import { SolutionStep, SolutionStepState } from "../../services/types/solution";
+import { SolutionStepState } from "../../services/types/solution";
 import { ProblemInputCircles } from "../problem-input/problem-input-selector";
 import { ShowSolutionStepCircle } from "./show-solution-step-circle";
 import { ShowSolutionStepRay } from "./show-solution-step-ray";

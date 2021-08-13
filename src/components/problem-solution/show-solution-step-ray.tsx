@@ -13,11 +13,11 @@ export const ShowSolutionStepRay: React.FC<Props> = ({ step }) => {
   const cellIndex =
     step.move > nbCircles ? step.rayIndex + nbRays : step.rayIndex;
   const start = computeCircleCenter({
-    circleIndex: 0,
+    circleIndex: -1.3,
     cellIndex,
   });
   const end = computeCircleCenter({
-    circleIndex: minMove,
+    circleIndex: minMove - 1,
     cellIndex,
   });
 
