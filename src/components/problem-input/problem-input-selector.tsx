@@ -8,20 +8,19 @@ import {
 import _ from "lodash";
 import { ProblemInput } from "../../services/types/problem-input";
 import { Box, FormControlLabel, Radio, RadioGroup } from "@material-ui/core";
+import { centreSpace, computeCircleCenter } from "./show-problem-maths";
 
 type CellSelectorProps = CircleSelectorProps & {
   cellIndex: number;
 };
 
-const centreSpace = 3;
 const CellSelector: React.FC<CellSelectorProps> = ({
   cellIndex,
   circleIndex,
   onChange,
   value,
 }) => {
-  const radius = circleIndex + centreSpace + 0.5;
-  const angle = (cellIndex / nbCellsOnCircle) * Math.PI * 2;
+  const { x, y } = computeCircleCenter({ circleIndex, cellIndex });
   const cellValue = value.circles[circleIndex][cellIndex];
   const handleClick = () => {
     onChange &&
@@ -39,8 +38,8 @@ const CellSelector: React.FC<CellSelectorProps> = ({
   return (
     <circle
       onClick={handleClick}
-      cx={radius * Math.cos(angle)}
-      cy={radius * Math.sin(angle)}
+      cx={x}
+      cy={y}
       r={0.5}
       fill={cellValue ? "dodgerblue" : "white"}
     />
@@ -62,11 +61,13 @@ const CircleSelector: React.FC<CircleSelectorProps> = (props) => {
 
 type ProblemInputCirclesProps = ProblemInputSelectorProps & {
   size: "small" | "med" | "big";
+  children?: React.ReactNode;
 };
 
-export const ProblemInputCircles: React.FC<ProblemInputCirclesProps> = (
-  props
-) => {
+export const ProblemInputCircles: React.FC<ProblemInputCirclesProps> = ({
+  children,
+  ...props
+}) => {
   const viewBoxSide = nbCircles + centreSpace;
   const sizeRatio = { small: 27, med: 46, big: 100 }[props.size];
 
@@ -81,6 +82,7 @@ export const ProblemInputCircles: React.FC<ProblemInputCirclesProps> = (
       {_.range(nbCircles).map((i) => (
         <CircleSelector circleIndex={i} {...props} key={i} />
       ))}
+      {children}
     </svg>
   );
 };
