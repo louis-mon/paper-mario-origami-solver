@@ -26,6 +26,14 @@ export const ShowSolutionStepCircle: React.FC<Props> = ({ step }) => {
   return (
     <>
       <SolutionStepCommon move={move} />
+      <circle
+        strokeWidth={1}
+        stroke={"rgba(137,53,150,0.37)"}
+        fill="none"
+        cx={0}
+        cy={0}
+        r={radius}
+      />
       <path
         strokeWidth={0.3}
         stroke={solutionStepColor}
