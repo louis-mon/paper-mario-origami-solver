@@ -52,8 +52,8 @@ export const GoalSelector: React.FC<GoalSelectorProps> = ({
           />
         ))}
       </Box>
-      <Box m={1}>Select constraint</Box>
       <Box display={"flex"} justifyContent={"space-evenly"} m={1}>
+        <Box m={1}>Constraint: </Box>
         {goalValues.map((goal) => (
           <FormControlLabel
             onChange={(_e, checked) =>

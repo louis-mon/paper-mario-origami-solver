@@ -25,4 +25,6 @@ export type Solution = {
   steps: SolutionStepState[];
   finalState: ProblemInput;
   totalMove: number;
+  // how the constraints are failed, between 0 and 1, the lower the better
+  divergence: number;
 };

@@ -30,7 +30,9 @@ const useStyle = makeStyles({
 type SolutionWithId = Solution & { id: number };
 
 const sortSolutions = (sols: SolutionWithId[]): SolutionWithId[] =>
-  sols.slice().sort((a, b) => a.totalMove - b.totalMove);
+  sols
+    .slice()
+    .sort((a, b) => a.divergence - b.divergence || a.totalMove - b.totalMove);
 
 export const ShowSolutions: React.FC<{ problem: ProblemInput }> = ({
   problem,
@@ -112,6 +114,16 @@ export const ShowSolutions: React.FC<{ problem: ProblemInput }> = ({
               >
                 <Functions fontSize={"inherit"} />
                 {sol.totalMove}
+              </Box>
+              <Box
+                right={0}
+                mr={1}
+                position={"absolute"}
+                display={"flex"}
+                alignItems={"center"}
+                color={"rgba(246,215,24,0.85)"}
+              >
+                {sol.divergence === 0 && <Star fontSize={"small"} />}
               </Box>
               <ProblemInputCircles value={sol.finalState} size={"small"} />
             </Box>

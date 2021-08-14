@@ -1,5 +1,6 @@
 import _, { sumBy } from "lodash";
 import {
+  Goal,
   ProblemInput,
   ProblemInputCircles,
   TargetInput,
@@ -23,6 +24,8 @@ type GetNewState<T extends SolutionStep> = (
   circles: ProblemInputCircles,
   step: T
 ) => ProblemInputCircles;
+
+type CheckedSolution = Array<{ index: number; goal: Goal }>;
 
 export const solveProblem = (params: SolveProblemParams) => {
   const nbCircles = params.problem.circles.length;
@@ -65,14 +68,39 @@ export const solveProblem = (params: SolveProblemParams) => {
     }
   };
 
-  const makeSolution = (state: SearchState): Solution => {
+  const makeSolution = (
+    state: SearchState,
+    solution: CheckedSolution
+  ): Solution => {
     const normalizedSteps = state.steps.map(
       (step): SolutionStepState => ({
         ...step,
         step: makeMinimalStep(step.step),
       })
     );
+
+    const divergence =
+      _.sumBy(solution, (part) => {
+        const colorsInPart = _.uniq(
+          state.problem.circles.flatMap((circle) => [
+            circle[part.index % nbCells],
+            ...(part.goal === "block"
+              ? [circle[(part.index + 1) % nbCells]]
+              : []),
+          ])
+        ).filter((value): value is number => value !== null);
+
+        if (colorsInPart.length === 0) return 0;
+        if (colorsInPart.length === 1) {
+          const goal = state.problem.goals[colorsInPart[0]];
+          if (!goal || goal === part.goal) return 0;
+          return 0.5;
+        }
+        return 1;
+      }) / solution.length;
+
     return {
+      divergence,
       finalState: state.problem,
       steps: normalizedSteps,
       totalMove: sumBy(normalizedSteps, (step) => Math.abs(step.step.move)),
@@ -98,7 +126,7 @@ export const solveProblem = (params: SolveProblemParams) => {
     return true;
   };
 
-  const checkSolution = (problem: ProblemInput): boolean => {
+  const checkSolution = (problem: ProblemInput): CheckedSolution | null => {
     const checkLine =
       (p: (value: TargetInput) => boolean) => (rayIndex: number) =>
         problem.circles.every((circle) => p(circle[rayIndex % nbCells]));
@@ -114,16 +142,22 @@ export const solveProblem = (params: SolveProblemParams) => {
       );
     };
 
-    const checkOnRange = (fromIndex: number, toIndex: number) => {
+    const checkOnRange = (
+      fromIndex: number,
+      toIndex: number
+    ): CheckedSolution | null => {
       let currentIndex = fromIndex;
+      const solution: CheckedSolution = [];
       while (currentIndex < toIndex) {
         if (checkLineOk(currentIndex)) {
+          solution.push({ goal: "line", index: currentIndex });
           ++currentIndex;
         } else if (checkBlock(currentIndex) && currentIndex < toIndex - 1) {
+          solution.push({ goal: "block", index: currentIndex });
           currentIndex += 2;
-        } else return false;
+        } else return null;
       }
-      return true;
+      return solution;
     };
 
     return checkOnRange(0, nbCells) || checkOnRange(1, nbCells + 1);
@@ -186,8 +220,9 @@ export const solveProblem = (params: SolveProblemParams) => {
           }),
         };
         if (cacheProblem(newState.problem)) return resolve();
-        if (checkSolution(newState.problem)) {
-          params.onSolution(makeSolution(newState));
+        const solution = checkSolution(newState.problem);
+        if (solution) {
+          params.onSolution(makeSolution(newState, solution));
           return resolve();
         }
         searchForSolsGivenSteps(newState).then(resolve);
