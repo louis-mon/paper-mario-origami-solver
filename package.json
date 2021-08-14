@@ -24,13 +24,16 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "check": "tsc --noEmit && eslint --fix src && prettier --write src"
+    "check": "tsc --noEmit && eslint --fix --max-warnings 0 src && prettier --write src"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "react-hooks/exhaustive-deps": "off"
+    }
   },
   "browserslist": {
     "production": [
