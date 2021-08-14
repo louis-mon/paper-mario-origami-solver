@@ -24,4 +24,5 @@ export type SolutionStepState = {
 export type Solution = {
   steps: SolutionStepState[];
   finalState: ProblemInput;
+  totalMove: number
 };

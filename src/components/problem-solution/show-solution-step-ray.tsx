@@ -1,7 +1,6 @@
 import React from "react";
 import { SolutionStepRay } from "../../services/types/solution";
 import { computeCircleCenter } from "../problem-input/show-problem-maths";
-import { nbCircles, nbRays } from "../../services/config";
 import { solutionStepColor, SolutionStepCommon } from "./solution-step-commons";
 
 type Props = {
@@ -9,21 +8,18 @@ type Props = {
 };
 
 export const ShowSolutionStepRay: React.FC<Props> = ({ step }) => {
-  const minMove = step.move > nbCircles ? nbCircles * 2 - step.move : step.move;
-  const cellIndex =
-    step.move > nbCircles ? step.rayIndex + nbRays : step.rayIndex;
   const start = computeCircleCenter({
     circleIndex: -1.3,
-    cellIndex,
+    cellIndex: step.rayIndex,
   });
   const end = computeCircleCenter({
-    circleIndex: minMove - 1,
-    cellIndex,
+    circleIndex: step.move - 1,
+    cellIndex: step.rayIndex,
   });
 
   return (
     <>
-      <SolutionStepCommon move={minMove} />
+      <SolutionStepCommon move={step.move} />
       <path
         strokeWidth={0.3}
         stroke={solutionStepColor}

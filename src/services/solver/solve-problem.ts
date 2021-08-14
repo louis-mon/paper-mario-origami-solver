@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _, { sumBy } from "lodash";
 import {
   ProblemInput,
   ProblemInputCircles,
@@ -11,6 +11,7 @@ import {
   SolutionStepRay,
   SolutionStepState,
 } from "../types/solution";
+import { nbCellsOnCircle, nbCircles, nbRays } from "../config";
 
 export type SolveProblemParams = {
   problem: ProblemInput;
@@ -46,6 +47,37 @@ export const solveProblem = (params: SolveProblemParams) => {
   ).map(() => ({}));
 
   let canceled = false;
+
+  const makeMinimalStep = (step: SolutionStep): SolutionStep => {
+    switch (step.kind) {
+      case "circle":
+        const invert = step.move > nbRays;
+        return {
+          ...step,
+          move: invert ? step.move - nbCellsOnCircle : step.move,
+        };
+      case "ray":
+        const minMove =
+          step.move > nbCircles ? nbCircles * 2 - step.move : step.move;
+        const cellIndex =
+          step.move > nbCircles ? step.rayIndex + nbRays : step.rayIndex;
+        return { kind: "ray", move: minMove, rayIndex: cellIndex };
+    }
+  };
+
+  const makeSolution = (state: SearchState): Solution => {
+    const normalizedSteps = state.steps.map(
+      (step): SolutionStepState => ({
+        ...step,
+        step: makeMinimalStep(step.step),
+      })
+    );
+    return {
+      finalState: state.problem,
+      steps: normalizedSteps,
+      totalMove: sumBy(normalizedSteps, (step) => Math.abs(step.step.move)),
+    };
+  };
 
   const cacheProblem = (problem: ProblemInput): boolean => {
     const signature = problem.circles
@@ -154,10 +186,7 @@ export const solveProblem = (params: SolveProblemParams) => {
         };
         if (cacheProblem(newState.problem)) return resolve();
         if (checkSolution(newState.problem)) {
-          params.onSolution({
-            steps: newState.steps,
-            finalState: newState.problem,
-          });
+          params.onSolution(makeSolution(newState));
           return resolve();
         }
         searchForSolsGivenSteps(newState).then(resolve);
