@@ -1,6 +1,6 @@
 import { nbCellsOnCircle } from "../../services/config";
 
-export const centreSpace = 3;
+export const centreSpace = 2;
 
 export const circleRadius = (circleIndex: number) =>
   circleIndex + centreSpace + 0.5;

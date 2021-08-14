@@ -25,7 +25,7 @@ export const goalConfig: GoalConfig = [
   { color: "dodgerblue" },
   { color: "PaleVioletRed" },
   { color: "LightSalmon" },
-  { color: "Khaki" },
+  { color: "gold" },
   { color: "MediumPurple" },
   { color: "Lime" },
 ];

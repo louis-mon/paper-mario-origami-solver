@@ -65,8 +65,8 @@ export const GoalSelector: React.FC<GoalSelectorProps> = ({
             }
             checked={goal === value.goals[context.value]}
             control={<Radio />}
-            label={goal}
-            key={goal}
+            label={goal || "free"}
+            key={goal || "free"}
           />
         ))}
       </Box>
