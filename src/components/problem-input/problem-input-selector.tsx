@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  goalConfig,
   nbCellsOnCircle,
   nbCircles,
   nbMaxSteps,
@@ -9,6 +10,11 @@ import _ from "lodash";
 import { ProblemInput } from "../../services/types/problem-input";
 import { Box, FormControlLabel, Radio, RadioGroup } from "@material-ui/core";
 import { centreSpace, computeCircleCenter } from "./show-problem-maths";
+import {
+  GoalSelector,
+  SelectGoalContext,
+  SelectGoalProvider,
+} from "./goal-selector";
 
 type CellSelectorProps = CircleSelectorProps & {
   cellIndex: number;
@@ -20,6 +26,7 @@ const CellSelector: React.FC<CellSelectorProps> = ({
   onChange,
   value,
 }) => {
+  const goalContext = React.useContext(SelectGoalContext);
   const { x, y } = computeCircleCenter({ circleIndex, cellIndex });
   const cellValue = value.circles[circleIndex][cellIndex];
   const handleClick = () => {
@@ -29,7 +36,11 @@ const CellSelector: React.FC<CellSelectorProps> = ({
         circles: value.circles.map((circle, i) =>
           i === circleIndex
             ? circle.map((cell, j) =>
-                j === cellIndex ? (cell === null ? 1 : null) : cell
+                j === cellIndex
+                  ? cell === null
+                    ? goalContext.value
+                    : null
+                  : cell
               )
             : circle
         ),
@@ -41,7 +52,7 @@ const CellSelector: React.FC<CellSelectorProps> = ({
       cx={x}
       cy={y}
       r={0.5}
-      fill={cellValue ? "dodgerblue" : "white"}
+      fill={cellValue !== null ? goalConfig[cellValue].color : "white"}
     />
   );
 };
@@ -95,24 +106,28 @@ export const ProblemInputSelector: React.FC<ProblemInputSelectorProps> = (
   props
 ) => {
   return (
-    <Box display={"flex"} alignItems="center" flexDirection={"column"}>
-      <ProblemInputCircles {...props} size={"big"} />
-      <RadioGroup
-        row
-        value={props.value.nbSteps}
-        onChange={({ target: { value } }) =>
-          props.onChange!({ ...props.value, nbSteps: Number.parseInt(value) })
-        }
-      >
-        {_.range(nbMinSteps, nbMaxSteps + 1).map((nbStep) => (
-          <FormControlLabel
-            key={nbStep}
-            value={nbStep}
-            control={<Radio />}
-            label={nbStep}
-          />
-        ))}
-      </RadioGroup>
-    </Box>
+    <SelectGoalProvider>
+      <Box display={"flex"} alignItems="center" flexDirection={"column"}>
+        <ProblemInputCircles {...props} size={"big"} />
+        <Box m={1}>Select number of moves</Box>
+        <RadioGroup
+          row
+          value={props.value.nbSteps}
+          onChange={({ target: { value } }) =>
+            props.onChange!({ ...props.value, nbSteps: Number.parseInt(value) })
+          }
+        >
+          {_.range(nbMinSteps, nbMaxSteps + 1).map((nbStep) => (
+            <FormControlLabel
+              key={nbStep}
+              value={nbStep}
+              control={<Radio />}
+              label={nbStep}
+            />
+          ))}
+        </RadioGroup>
+        <GoalSelector {...props} />
+      </Box>
+    </SelectGoalProvider>
   );
 };

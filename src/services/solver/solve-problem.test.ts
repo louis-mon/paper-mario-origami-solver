@@ -3,12 +3,12 @@ import { solveProblem } from "./solve-problem";
 import { Solution, SolutionStep } from "../types/solution";
 
 describe("Solve problem", () => {
-  const expectProblem = (problem: ProblemInput) => {
+  const expectProblem = (problem: Omit<ProblemInput, "goals">) => {
     const findSolutions = (): Promise<Solution[]> =>
       new Promise((resolve) => {
         const solutions: Solution[] = [];
         solveProblem({
-          problem,
+          problem: { ...problem, goals: {} },
           onSolution: (sol) => solutions.push(sol),
           onFinish: () => resolve(solutions),
         });
@@ -19,16 +19,16 @@ describe("Solve problem", () => {
         expect(
           solutions.map((sol) => sol.steps.map((step) => step.step))
         ).toContainEqual(expectedSol);
-        return tester
+        return tester;
       },
       toHaveOnlySolution: async (expectedSol: SolutionStep[]) => {
         const solutions = await findSolutions();
         expect(
           solutions.map((sol) => sol.steps.map((step) => step.step))
         ).toEqual([expectedSol]);
-      }
+      },
     };
-    return tester
+    return tester;
   };
 
   const tar0 = 0;
@@ -170,5 +170,8 @@ describe("Solve problem", () => {
         [null, null, null, null, null, null],
         [tar0, null, null, tar0, null, null],
       ],
-    }).toHaveOnlySolution([{kind: "ray", rayIndex: 0, move: 1}, { kind: "circle", circleIndex: 1, move: 4 }]));
+    }).toHaveOnlySolution([
+      { kind: "ray", rayIndex: 0, move: 1 },
+      { kind: "circle", circleIndex: 1, move: 4 },
+    ]));
 });

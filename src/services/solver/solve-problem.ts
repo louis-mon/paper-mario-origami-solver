@@ -11,7 +11,7 @@ import {
   SolutionStepRay,
   SolutionStepState,
 } from "../types/solution";
-import { nbCellsOnCircle, nbCircles, nbRays } from "../config";
+import { nbCellsOnCircle } from "../config";
 
 export type SolveProblemParams = {
   problem: ProblemInput;
@@ -176,6 +176,7 @@ export const solveProblem = (params: SolveProblemParams) => {
         if (canceled) return resolve();
         const newState: SearchState = {
           problem: {
+            ...currentState.problem,
             nbSteps: currentState.problem.nbSteps - 1,
             circles: getNewState(currentState.problem.circles, newStep),
           },

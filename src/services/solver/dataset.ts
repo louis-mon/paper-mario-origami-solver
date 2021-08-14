@@ -10,4 +10,5 @@ export const problem1: ProblemInput = {
     [null, tar0, null, null, null, null, null, null, null, null, null, null],
     [null, null, null, null, null, null, null, null, null, null, null, null]
   ],
+  goals: {},
 };

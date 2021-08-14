@@ -11,7 +11,21 @@ export const initialProblemInput: ProblemInput = {
     _.range(nbCellsOnCircle).map((j) => null)
   ),
   nbSteps: 2,
+  goals: {},
 };
 
 export const nbMinSteps = 1;
 export const nbMaxSteps = 4;
+
+type GoalConfig = Array<{ color: string }>;
+
+export const defaultGoal = 0;
+
+export const goalConfig: GoalConfig = [
+  { color: "dodgerblue" },
+  { color: "PaleVioletRed" },
+  { color: "LightSalmon" },
+  { color: "Khaki" },
+  { color: "MediumPurple" },
+  { color: "Lime" },
+];
