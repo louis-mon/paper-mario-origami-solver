@@ -132,7 +132,9 @@ export const ShowSolutions: React.FC<{ problem: ProblemInput }> = ({
       </ImageList>
       <Box margin={2}>Solution steps:</Box>
       {selected !== null ? (
-        <SolutionDescription solution={solutions[selected]} />
+        <SolutionDescription
+          solution={solutions.find((sol) => sol.id === selected)!}
+        />
       ) : null}
     </Box>
   );
