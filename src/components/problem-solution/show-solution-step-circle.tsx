@@ -12,14 +12,15 @@ type Props = {
 };
 
 export const ShowSolutionStepCircle: React.FC<Props> = ({ step }) => {
-  const move = step.move > nbRays ? nbCellsOnCircle - step.move : step.move;
+  const invert = step.move > nbRays;
+  const move = invert ? nbCellsOnCircle - step.move : step.move;
   const start = computeCircleCenter({
     circleIndex: step.circleIndex,
     cellIndex: 0,
   });
   const end = computeCircleCenter({
     circleIndex: step.circleIndex,
-    cellIndex: move,
+    cellIndex: step.move,
   });
 
   const radius = circleRadius(step.circleIndex);
@@ -39,7 +40,9 @@ export const ShowSolutionStepCircle: React.FC<Props> = ({ step }) => {
         stroke={solutionStepColor}
         fill="none"
         markerEnd="url(#arrow)"
-        d={`M ${start.x},${start.y} A ${radius} ${radius} 0 0 1 ${end.x},${end.y}`}
+        d={`M ${start.x},${start.y} A ${radius} ${radius} 0 0 ${
+          invert ? 0 : 1
+        } ${end.x},${end.y}`}
       />
     </>
   );
