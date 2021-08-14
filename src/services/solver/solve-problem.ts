@@ -12,7 +12,6 @@ import {
   SolutionStepRay,
   SolutionStepState,
 } from "../types/solution";
-import { nbCellsOnCircle } from "../config";
 
 export type SolveProblemParams = {
   problem: ProblemInput;
@@ -57,7 +56,7 @@ export const solveProblem = (params: SolveProblemParams) => {
         const invert = step.move > nbRays;
         return {
           ...step,
-          move: invert ? step.move - nbCellsOnCircle : step.move,
+          move: invert ? step.move - nbCells : step.move,
         };
       case "ray":
         const minMove =
@@ -204,30 +203,30 @@ export const solveProblem = (params: SolveProblemParams) => {
     currentState: SearchState;
     newStep: T;
     getNewState: GetNewState<T>;
-  }): Promise<void> =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        if (canceled) return resolve();
-        const newState: SearchState = {
-          problem: {
-            ...currentState.problem,
-            nbSteps: currentState.problem.nbSteps - 1,
-            circles: getNewState(currentState.problem.circles, newStep),
-          },
-          steps: currentState.steps.concat({
-            step: newStep,
-            problem: currentState.problem,
-          }),
-        };
-        if (cacheProblem(newState.problem)) return resolve();
-        const solution = checkSolution(newState.problem);
-        if (solution) {
-          params.onSolution(makeSolution(newState, solution));
-          return resolve();
-        }
-        searchForSolsGivenSteps(newState).then(resolve);
-      }, 0)
-    );
+  }): Promise<void> => {
+    if (canceled) return;
+    const newState: SearchState = {
+      problem: {
+        ...currentState.problem,
+        nbSteps: currentState.problem.nbSteps - 1,
+        circles: getNewState(currentState.problem.circles, newStep),
+      },
+      steps: currentState.steps.concat({
+        step: newStep,
+        problem: currentState.problem,
+      }),
+    };
+    if (cacheProblem(newState.problem)) return;
+    const solution = checkSolution(newState.problem);
+    if (solution) {
+      params.onSolution(makeSolution(newState, solution));
+      return;
+    }
+    await searchForSolsGivenSteps(newState);
+  };
+
+  const callNonBlocking = (f: () => Promise<void>): Promise<void> =>
+    new Promise((resolve) => setTimeout(() => f().then(resolve), 0));
 
   const searchForSolsGivenSteps = async (
     currentState: SearchState
@@ -266,7 +265,9 @@ export const solveProblem = (params: SolveProblemParams) => {
             })
         )
     );
-    await Promise.all(circleSubSteps.concat(raySubSteps).map((step) => step()));
+    const callStep: (f: () => Promise<void>) => Promise<void> =
+      currentState.problem.nbSteps === 1 ? (f) => f() : callNonBlocking;
+    await Promise.all(circleSubSteps.concat(raySubSteps).map(callStep));
   };
 
   searchForSolsGivenSteps({

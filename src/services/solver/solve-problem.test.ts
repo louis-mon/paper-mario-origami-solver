@@ -50,7 +50,7 @@ describe("Solve problem", () => {
         [null, null, null, tar0, null, null],
         [null, tar0, null, null, null, null],
       ],
-    }).toHaveOnlySolution([{ kind: "circle", circleIndex: 1, move: 4 }]));
+    }).toHaveOnlySolution([{ kind: "circle", circleIndex: 1, move: -2 }]));
 
   test("two lines circle", () =>
     expectProblem({
@@ -62,7 +62,7 @@ describe("Solve problem", () => {
         [tar0, null, null, null, null, null],
       ],
     }).toHaveOnlySolution([
-      { kind: "circle", circleIndex: 1, move: 4 },
+      { kind: "circle", circleIndex: 1, move: -2 },
       { kind: "circle", circleIndex: 3, move: 1 },
     ]));
 
@@ -79,7 +79,7 @@ describe("Solve problem", () => {
     oneLineRay1.toHaveSolution([{ kind: "ray", rayIndex: 1, move: 2 }]));
 
   test("one line ray 1: second", () =>
-    oneLineRay1.toHaveSolution([{ kind: "ray", rayIndex: 1, move: 6 }]));
+    oneLineRay1.toHaveSolution([{ kind: "ray", rayIndex: 4, move: 2 }]));
 
   test("one line ray 2", () =>
     expectProblem({
@@ -128,7 +128,7 @@ describe("Solve problem", () => {
       ],
     }).toHaveOnlySolution([
       { kind: "ray", rayIndex: 2, move: 1 },
-      { kind: "circle", circleIndex: 3, move: 5 },
+      { kind: "circle", circleIndex: 3, move: -1 },
     ]));
 
   const expectBlockOneCircleMove = expectProblem({
@@ -142,7 +142,7 @@ describe("Solve problem", () => {
   });
   test("block with one circle move", () =>
     expectBlockOneCircleMove.toHaveSolution([
-      { kind: "circle", circleIndex: 1, move: 5 },
+      { kind: "circle", circleIndex: 1, move: -1 },
     ]));
 
   test("block with one circle move 2", () =>
@@ -159,7 +159,7 @@ describe("Solve problem", () => {
         [null, null, null, null, null, null],
         [null, null, null, null, null, null],
       ],
-    }).toHaveSolution([{ kind: "circle", circleIndex: 1, move: 4 }]));
+    }).toHaveSolution([{ kind: "circle", circleIndex: 1, move: -2 }]));
 
   test("block line spaced with one circle move 3", () =>
     expectProblem({
@@ -172,6 +172,6 @@ describe("Solve problem", () => {
       ],
     }).toHaveOnlySolution([
       { kind: "ray", rayIndex: 0, move: 1 },
-      { kind: "circle", circleIndex: 1, move: 4 },
+      { kind: "circle", circleIndex: 1, move: -2 },
     ]));
 });
