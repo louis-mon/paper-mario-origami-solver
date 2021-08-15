@@ -13,7 +13,7 @@ export const computeCircleCenter = ({
   circleIndex: number;
 }) => {
   const radius = circleRadius(circleIndex);
-  const angle = (cellIndex / nbCellsOnCircle) * Math.PI * 2;
+  const angle = ((cellIndex + 0.5) / nbCellsOnCircle) * Math.PI * 2;
 
   return {
     x: radius * Math.cos(angle),
