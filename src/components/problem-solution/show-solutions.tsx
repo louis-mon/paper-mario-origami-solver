@@ -13,6 +13,7 @@ import {
 import { ProblemInputCircles } from "../problem-input/problem-input-selector";
 import { SolutionDescription } from "./solution-description";
 import { Functions, Star } from "@material-ui/icons";
+import { SelectBestIcon } from "../icons";
 
 const useStyle = makeStyles({
   selectedSolution: {
@@ -62,7 +63,6 @@ export const ShowSolutions: React.FC<{ problem: ProblemInput }> = ({
       onFinish: () => setTime(Date.now() - now),
     });
     return cancel;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -88,7 +88,7 @@ export const ShowSolutions: React.FC<{ problem: ProblemInput }> = ({
           disabled={solutions.length === 0}
           onClick={selectBest}
         >
-          <Star />
+          <SelectBestIcon />
           Best
         </Button>
         Found {solutions.length} solutions
