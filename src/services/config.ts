@@ -22,8 +22,8 @@ type GoalConfig = Array<{ color: string }>;
 export const defaultGoal = 0;
 
 export const goalConfig: GoalConfig = [
-  { color: "dodgerblue" },
-  { color: "PaleVioletRed" },
+  { color: "steelblue" },
+  { color: "turquoise" },
   { color: "LightSalmon" },
   { color: "gold" },
   { color: "MediumPurple" },

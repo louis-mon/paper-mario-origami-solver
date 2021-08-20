@@ -9,7 +9,11 @@ import {
 import _ from "lodash";
 import { ProblemInput } from "../../services/types/problem-input";
 import { Box, FormControlLabel, Radio, RadioGroup } from "@material-ui/core";
-import { centreSpace, computeCircleCenter } from "./show-problem-maths";
+import {
+  centreSpace,
+  circleRadius,
+  computeCircleCenter,
+} from "./show-problem-maths";
 import {
   GoalSelector,
   SelectGoalContext,
@@ -27,7 +31,25 @@ const CellSelector: React.FC<CellSelectorProps> = ({
   value,
 }) => {
   const goalContext = React.useContext(SelectGoalContext);
-  const { x, y } = computeCircleCenter({ circleIndex, cellIndex });
+  const size = 0.5;
+  const p0 = computeCircleCenter({
+    circleIndex: circleIndex - size,
+    cellIndex: cellIndex - size,
+  });
+  const p1 = computeCircleCenter({
+    circleIndex: circleIndex + size,
+    cellIndex: cellIndex - size,
+  });
+  const p2 = computeCircleCenter({
+    circleIndex: circleIndex + size,
+    cellIndex: cellIndex + size,
+  });
+  const p3 = computeCircleCenter({
+    circleIndex: circleIndex - size,
+    cellIndex: cellIndex + size,
+  });
+  const r1 = circleRadius(circleIndex - size);
+  const r2 = circleRadius(circleIndex + size);
   const cellValue = value.circles[circleIndex][cellIndex];
   const handleClick = () => {
     onChange &&
@@ -47,12 +69,12 @@ const CellSelector: React.FC<CellSelectorProps> = ({
       });
   };
   return (
-    <circle
+    <path
       onClick={handleClick}
-      cx={x}
-      cy={y}
-      r={0.5}
-      fill={cellValue !== null ? goalConfig[cellValue].color : "white"}
+      fill={cellValue !== null ? goalConfig[cellValue].color : "gainsboro"}
+      stroke={"black"}
+      strokeWidth={0.07}
+      d={`M ${p0.x},${p0.y} L ${p1.x},${p1.y} A ${r2} ${r2} 0 0 1 ${p2.x},${p2.y} L ${p3.x},${p3.y} A ${r1} ${r1} 0 0 0 ${p0.x},${p0.y} Z`}
     />
   );
 };

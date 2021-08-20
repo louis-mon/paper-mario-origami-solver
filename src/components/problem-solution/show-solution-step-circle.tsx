@@ -25,12 +25,13 @@ export const ShowSolutionStepCircle: React.FC<Props> = ({ step }) => {
     <>
       <SolutionStepCommon move={Math.abs(step.move)} />
       <circle
-        strokeWidth={1}
-        stroke={"rgba(137,53,150,0.37)"}
+        strokeWidth={0.1}
+        stroke={solutionStepColor}
         fill="none"
         cx={0}
         cy={0}
         r={radius}
+        strokeDasharray={"0.1 0.1"}
       />
       <path
         strokeWidth={0.3}
